@@ -1,58 +1,41 @@
 <template>
-  <section class="container">
-    <div>
-      <logo/>
-      <h1 class="title">
-        nuxtblog
-      </h1>
-      <h2 class="subtitle">
-        Nuxt.js project
-      </h2>
-      <div class="links">
-        <a href="https://nuxtjs.org/" target="_blank" class="button--green">Documentation</a>
-        <a href="https://github.com/nuxt/nuxt.js" target="_blank" class="button--grey">GitHub</a>
-      </div>
-    </div>
-  </section>
+  <div id="app">
+    <nuxt/>
+  </div>
 </template>
 
 <script>
-import Logo from '~/components/Logo.vue'
+import axios from '~/plugins/axios'
+import { httpConfig } from '~/configs/http.config'
 
 export default {
-  components: {
-    Logo
+  layout: 'index',
+  // asyncData () {
+  //   return axios.post('http://localhost:8081/api/articleList', {
+  //     'column': '',
+  //     'currentPage': 1
+  //   }).then(res => {
+  //     return {
+  //       data: res.data.data
+  //     }
+  //   })
+  // },
+  fetch ({store, params}) {
+    return Promise.all([
+      axios.post(`${httpConfig.localhost}/api/articleList`, {
+        'column': '',
+        'currentPage': 1
+      }).then(res => {
+        if (res.status === 200) {
+          store.commit('ARTICLE_LIST', res.data)
+        }
+      }),
+      axios.post(`${httpConfig.localhost}/api/catalogs`).then(res => {
+        if (res.status === 200) {
+          store.commit('CATALOG_LIST', res.data)
+        }
+      })
+    ])
   }
 }
 </script>
-
-<style>
-.container {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family: "Quicksand", "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; /* 1 */
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
-</style>
